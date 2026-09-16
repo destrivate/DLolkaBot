@@ -9,7 +9,7 @@ class Test {
         bot.getCommandManager().register(new Command("/test"){
             @Override
             public void onCommand(MessageContext messageContext){
-                bot.sendMessage(messageContext.getGuildId(),"test command");
+                bot.sendMessage(messageContext.getChannelId(),"test command");
             }
         } );
 
