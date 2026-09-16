@@ -6,10 +6,11 @@ class Test {
     Bot bot = new Bot("ODAzNzQ2NDk0NDY1MDI0.s6T5zTO5QACyPpF3sQ166U-Srvoh9gwi68lxucMUAQA");
     @org.junit.jupiter.api.Test
     void command(){
-        bot.getCommandManager().register(new Command("/test"){
+        bot.getCommandManager().register(new Command("/qer"){
             @Override
             public void onCommand(MessageContext messageContext){
-                bot.sendMessage(messageContext.getGuildId(),"test command");
+                bot.sendMessage(messageContext.getChannelId(),"test command");
+
             }
         } );
 

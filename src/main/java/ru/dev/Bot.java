@@ -58,7 +58,7 @@ public class Bot {
 
                 httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             } catch (Exception e) {
-
+                throw new RuntimeException(e);
             }
         });
     }
@@ -102,7 +102,7 @@ public class Bot {
                         if (!botId.equals(authorId)) {
                             commandManager.handle(new MessageContext(msg));
                             if (eventPublisher.getMessageCreateListener() != null){
-                                eventPublisher.getMessageCreateListener().onEvent(new MessageCreate(Events.MESSAGE_CREATE));
+                                eventPublisher.getMessageCreateListener().onEvent(new MessageCreate(Events.MESSAGE_CREATE,new MessageContext(msg)));
                             }
                         }
 
