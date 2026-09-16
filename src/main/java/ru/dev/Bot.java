@@ -82,6 +82,7 @@ public class Bot {
                     String t = event.optString("t", "NONE");
 
                     System.out.println("[<-] Event (Opcode " + op + "): " + t);
+                    System.out.println(event.toString());
 
                     if (op == 10 || (event.has("d") && event.getJSONObject("d").has("heartbeat_interval"))) {
                         long interval = event.getJSONObject("d").getLong("heartbeat_interval");
@@ -139,7 +140,7 @@ public class Bot {
 
         JSONObject d = new JSONObject();
         d.put("token", token);
-        d.put("intents", 33280);
+        d.put("intents", 33283);
         d.put("capabilities", 16383);
 
         JSONObject properties = new JSONObject();
