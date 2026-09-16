@@ -20,7 +20,7 @@
 ```java
 public class Main {
     public static void main(String[] args) {
-        DLolkaBot bot = new DLolkaBot("ВАШ_ТОКЕН");
+        Bot bot = new DLolkaBot("ВАШ_ТОКЕН");
 
         bot.getCommandManager().register(new Command("/test") {
             @Override
@@ -40,7 +40,7 @@ public class Main {
 ```java
 public class Main {
     public static void main(String[] args) {
-        DLolkaBot bot = new DLolkaBot("ВАШ_ТОКЕН");
+        Bot bot = new DLolkaBot("ВАШ_ТОКЕН");
 
         // Отслеживание абсолютно всех событий
         bot.getEventPublisher().globalEvent(event -> {
