@@ -7,6 +7,7 @@ import ru.dev.command.CommandManager;
 import ru.dev.context.MessageContext;
 import ru.dev.event.EventPublisher;
 import ru.dev.event.Events;
+import ru.dev.event.bot.Ready;
 import ru.dev.event.message.MessageCreate;
 
 import java.net.URI;
@@ -27,41 +28,22 @@ public class Bot {
     private ScheduledExecutorService heartbeatScheduler;
 
     private final CommandManager commandManager;
-    private final HttpClient httpClient;
+    private final ApiClient apiClient;
+
     private final EventPublisher eventPublisher;
 
 
     public Bot(String token) {
         this.token = token;
-        this.httpClient = HttpClient.newHttpClient();
+        this.apiClient = new ApiClient(token);
         this.commandManager = new CommandManager();
         this.eventPublisher = new EventPublisher();
     }
 
     public CommandManager getCommandManager(){return commandManager;}
     public EventPublisher getEventPublisher(){return eventPublisher;}
+    public ApiClient getApiClient() {return apiClient;}
 
-    public void sendMessage(String channelId, String textContent) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                String url = "https://lolka.app/api/bot/v10/channels/" + channelId + "/messages";
-
-                JSONObject payload = new JSONObject();
-                payload.put("content", textContent);
-
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(url))
-                        .header("Authorization", "Bot " + token)
-                        .header("Content-Type", "application/json")
-                        .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
-                        .build();
-
-                httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
 
 
     public void start(){
@@ -82,7 +64,7 @@ public class Bot {
                     String t = event.optString("t", "NONE");
 
                     System.out.println("[<-] Event (Opcode " + op + "): " + t);
-                    System.out.println(event.toString());
+                    System.out.println(event);
 
                     if (op == 10 || (event.has("d") && event.getJSONObject("d").has("heartbeat_interval"))) {
                         long interval = event.getJSONObject("d").getLong("heartbeat_interval");
@@ -90,25 +72,21 @@ public class Bot {
                         sendIdentify();
                         return;
                     }
-
-
-
                     if ("READY".equals(t)) {
                         botId = event.getJSONObject("d").getJSONObject("user").getString("id");
+                        if (eventPublisher.getReadyEventListener() != null){
+                            eventPublisher.getReadyEventListener().onEvent(new Ready(Events.READY));
+                        }
                     } else if ("MESSAGE_CREATE".equals(t)) {
                         JSONObject msg = event.getJSONObject("d");
                         String authorId = msg.getJSONObject("author").getString("id");
-
                         if (!botId.equals(authorId)) {
                             commandManager.handle(new MessageContext(msg));
                             if (eventPublisher.getMessageCreateListener() != null){
                                 eventPublisher.getMessageCreateListener().onEvent(new MessageCreate(Events.MESSAGE_CREATE,new MessageContext(msg)));
                             }
                         }
-
-
                     }
-
                     if (eventPublisher.getGlobalEventListener() != null){
                         eventPublisher.getGlobalEventListener().onEvent(event);
                     }
@@ -182,4 +160,6 @@ public class Bot {
             heartbeatScheduler.shutdownNow();
         }
     }
+
+
 }

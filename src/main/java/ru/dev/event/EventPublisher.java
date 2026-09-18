@@ -1,6 +1,7 @@
 package ru.dev.event;
 
 import org.json.JSONObject;
+import ru.dev.event.bot.Ready;
 import ru.dev.event.message.MessageCreate;
 
 
@@ -25,6 +26,18 @@ public class EventPublisher {
     }
     public void messageCreateEvent(MessageCreateEvent listener) {
         this.messageCreateListener = listener;
+    }
+
+
+    private ReadyEvent readyEventListener;
+    public ReadyEvent getReadyEventListener() {
+        return readyEventListener;
+    }
+    public interface ReadyEvent {
+        void onEvent(Ready event);
+    }
+    public void readyEvent(ReadyEvent listener) {
+        this.readyEventListener = listener;
     }
 
 

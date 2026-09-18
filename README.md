@@ -20,12 +20,12 @@
 ```java
 public class Main {
     public static void main(String[] args) {
-        DLolkaBot bot = new DLolkaBot("ВАШ_ТОКЕН");
+        Bot bot = new Bot("ВАШ_ТОКЕН");
 
         bot.getCommandManager().register(new Command("/test") {
             @Override
             public void onCommand(MessageContext messageContext) {
-                bot.sendMessage(messageContext.getGuildId(), "test command");
+                bot.sendMessage(messageContext.getChannelId(), "test command");
             }
         });
 
@@ -40,7 +40,7 @@ public class Main {
 ```java
 public class Main {
     public static void main(String[] args) {
-        DLolkaBot bot = new DLolkaBot("ВАШ_ТОКЕН");
+        Bot bot = new Bot("ВАШ_ТОКЕН");
 
         // Отслеживание абсолютно всех событий
         bot.getEventPublisher().globalEvent(event -> {
