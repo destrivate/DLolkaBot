@@ -10,7 +10,7 @@ class Test {
         bot.getCommandManager().register(new Command("/test"){
             @Override
             public void onCommand(MessageContext messageContext){
-                bot.getApiClient().sendMessage(messageContext.getChannelId(),"123");
+                bot.getApiClient().sendMessage(messageContext.getChannelId(),messageContext.getReferencedMessage().getContent());
             }
         } );
 
