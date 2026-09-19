@@ -1,5 +1,6 @@
 package ru.dev.context;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 import ru.dev.model.Author;
 import ru.dev.model.Member;
@@ -17,7 +18,7 @@ public class MessageContext {
     private int flags;
     private Author author;
     private Member member;
-    private ReferencedMessage referencedMessage = null;
+    private ReferencedMessage referencedMessage;
 
     public MessageContext(JSONObject jsonObject) {
         this.id = jsonObject.optString("id");
@@ -31,7 +32,12 @@ public class MessageContext {
         this.flags = jsonObject.optInt("flags", 0);
         this.author = new Author(jsonObject.getJSONObject("author"));
         this.member = new Member(jsonObject.getJSONObject("author"));
-        this.referencedMessage = new ReferencedMessage(jsonObject.getJSONObject("referenced_message"));
+        try {
+            this.referencedMessage = new ReferencedMessage(jsonObject.getJSONObject("referenced_message"));
+        } catch (JSONException e) {
+            this.referencedMessage = null;
+        }
+
     }
 
     public String getId() {

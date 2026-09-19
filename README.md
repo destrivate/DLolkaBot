@@ -34,6 +34,26 @@ public class Main {
 }
 ```
 
+Пример комманды повторения сообщения
+```java
+public static void main(String[] args) {
+    Bot bot = new Bot("ВАШ_ТОКЕН");
+    
+    bot.getCommandManager().register(new Command("/repeat") {
+        @Override
+        public void onCommand(MessageContext ctx) {
+            if (ctx.getReferencedMessage() != null) {
+                bot.getApiClient().sendMessage(ctx.getChannelId(), ctx.getReferencedMessage().getContent());
+                return;
+            }
+            bot.getApiClient().sendMessage(ctx.getChannelId(), "Ответь на сообщение ,которое надо повторить!");
+        }
+    });
+    
+    bot.start();
+}
+```
+
 ### 2. Ловля событий (Event Handling)
 Вы можете подписываться как на все события сразу (глобально), так и на конкретные действия — например, на создание нового сообщения:
 

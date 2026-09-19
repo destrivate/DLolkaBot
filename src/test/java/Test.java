@@ -4,13 +4,17 @@ import ru.dev.command.Command;
 import ru.dev.context.MessageContext;
 
 class Test {
-    Bot bot = new Bot("ODAzNzQ2NDk0NDY1MDI0.s6T5zTO5QACyPpF3sQ166U-Srvoh9gwi68lxucMUAQA");
+    Bot bot = new Bot("ODAzNzQ2NDk0NDY1MDI0.fjitdbtspIG2FZvgEt3awkEBjejqFyPfMVT5kNVT20Q");
     @org.junit.jupiter.api.Test
-    void command(){
-        bot.getCommandManager().register(new Command("/test"){
+    void repeat(){
+        bot.getCommandManager().register(new Command("/repeat"){
             @Override
-            public void onCommand(MessageContext messageContext){
-                bot.getApiClient().sendMessage(messageContext.getChannelId(),messageContext.getReferencedMessage().getContent());
+            public void onCommand(MessageContext ctx){
+                if (ctx.getReferencedMessage() != null){
+                    bot.getApiClient().sendMessage(ctx.getChannelId(),ctx.getReferencedMessage().getContent());
+                    return;
+                }
+                bot.getApiClient().sendMessage(ctx.getChannelId(),"Ответь на сообщение ,которое надо повторить!");
             }
         } );
 
