@@ -7,14 +7,10 @@ import ru.dev.command.CommandManager;
 import ru.dev.context.MessageContext;
 import ru.dev.event.EventPublisher;
 import ru.dev.event.Events;
-import ru.dev.event.bot.Ready;
-import ru.dev.event.message.MessageCreate;
+import ru.dev.event.bot.OnReady;
+import ru.dev.event.message.OnMessageCreate;
 
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -75,20 +71,20 @@ public class Bot {
                     if ("READY".equals(t)) {
                         botId = event.getJSONObject("d").getJSONObject("user").getString("id");
                         if (eventPublisher.getReadyEventListener() != null){
-                            eventPublisher.getReadyEventListener().onEvent(new Ready(Events.READY));
+                            eventPublisher.getReadyEventListener().onEvent(new OnReady(Events.READY));
                         }
                     } else if ("MESSAGE_CREATE".equals(t)) {
                         JSONObject msg = event.getJSONObject("d");
                         String authorId = msg.getJSONObject("author").getString("id");
                         if (!botId.equals(authorId)) {
                             commandManager.handle(new MessageContext(msg));
-                            if (eventPublisher.getMessageCreateListener() != null){
-                                eventPublisher.getMessageCreateListener().onEvent(new MessageCreate(Events.MESSAGE_CREATE,new MessageContext(msg)));
+                            if (eventPublisher.getOnMessageCreateListener() != null){
+                                eventPublisher.getOnMessageCreateListener().onEvent(new OnMessageCreate(Events.MESSAGE_CREATE,new MessageContext(msg)));
                             }
                         }
                     }
-                    if (eventPublisher.getGlobalEventListener() != null){
-                        eventPublisher.getGlobalEventListener().onEvent(event);
+                    if (eventPublisher.getOnGlobalEventListener() != null){
+                        eventPublisher.getOnGlobalEventListener().onEvent(event);
                     }
 
 

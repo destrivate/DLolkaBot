@@ -63,12 +63,12 @@ public class Main {
         Bot bot = new Bot("ВАШ_ТОКЕН");
 
         // Отслеживание абсолютно всех событий
-        bot.getEventPublisher().globalEvent(event -> {
+        bot.getEventPublisher().onGlobalEvent(event -> {
             System.out.println("Получено глобальное событие: " + event.toString());
         });
 
         // Отслеживание только создания сообщений
-        bot.getEventPublisher().messageCreateEvent(event -> {
+        bot.getEventPublisher().onMessageCreateEvent(event -> {
             System.out.println("Новое сообщение! Тип: " + event.getType());
         });
 

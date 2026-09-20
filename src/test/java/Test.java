@@ -31,17 +31,19 @@ class Test {
     @org.junit.jupiter.api.Test
     void event(){
 
-        bot.getEventPublisher().globalEvent(event -> {
+        bot.getEventPublisher().onGlobalEvent(event -> {
             System.out.println("Event");
         });
 
-        bot.getEventPublisher().messageCreateEvent(event -> {
+        bot.getEventPublisher().onMessageCreateEvent(event -> {
             System.out.println(event.getType());
         });
 
-        bot.getEventPublisher().readyEvent(event -> {
+        bot.getEventPublisher().onReadyEvent(event -> {
             System.out.println("bot ready");
         });
+
+
 
         bot.start();
 
