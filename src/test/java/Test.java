@@ -2,6 +2,8 @@ import org.json.JSONObject;
 import ru.dev.Bot;
 import ru.dev.command.Command;
 import ru.dev.context.MessageContext;
+import ru.dev.event.bot.OnReady;
+import ru.dev.event.message.OnMessageCreate;
 
 class Test {
     Bot bot = new Bot("ODAzNzQ2NDk0NDY1MDI0.fjitdbtspIG2FZvgEt3awkEBjejqFyPfMVT5kNVT20Q");
@@ -17,9 +19,7 @@ class Test {
                 bot.getApiClient().sendMessage(ctx.getChannelId(),"Ответь на сообщение ,которое надо повторить!");
             }
         } );
-
         bot.start();
-
         try {
             Thread.currentThread().join();
         } catch (InterruptedException e) {
@@ -31,19 +31,17 @@ class Test {
     @org.junit.jupiter.api.Test
     void event(){
 
-        bot.getEventPublisher().onGlobalEvent(event -> {
+        bot.getEventManager().on(OnReady.class, event -> {
             System.out.println("Event");
         });
 
-        bot.getEventPublisher().onMessageCreateEvent(event -> {
-            System.out.println(event.getType());
+        bot.getEventManager().on(OnMessageCreate.class, event -> {
+            System.out.println(event.getMessageContext().getContent());
         });
 
-        bot.getEventPublisher().onReadyEvent(event -> {
+        bot.getEventManager().on(OnReady.class, event -> {
             System.out.println("bot ready");
         });
-
-
 
         bot.start();
 
