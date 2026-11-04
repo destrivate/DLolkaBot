@@ -61,15 +61,17 @@ public static void main(String[] args) {
 public class Main {
     public static void main(String[] args) {
         Bot bot = new Bot("ВАШ_ТОКЕН");
-
-        // Отслеживание абсолютно всех событий
-        bot.getEventPublisher().onGlobalEvent(event -> {
-            System.out.println("Получено глобальное событие: " + event.toString());
+        
+        bot.getEventManager().on(OnReady.class, event -> {
+            System.out.println("Event");
         });
 
-        // Отслеживание только создания сообщений
-        bot.getEventPublisher().onMessageCreateEvent(event -> {
-            System.out.println("Новое сообщение! Тип: " + event.getType());
+        bot.getEventManager().on(OnMessageCreate.class, event -> {
+            System.out.println(event.getMessageContext().getContent());
+        });
+
+        bot.getEventManager().on(OnReady.class, event -> {
+            System.out.println("bot ready");
         });
 
         bot.start();
