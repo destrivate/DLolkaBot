@@ -5,15 +5,11 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONObject;
 import ru.dev.command.CommandManager;
 import ru.dev.context.MessageContext;
-import ru.dev.event.EventPublisher;
-import ru.dev.event.Events;
-import ru.dev.event.message.MessageCreate;
+import ru.dev.event.EventManager;
+import ru.dev.event.bot.OnReady;
+import ru.dev.event.message.OnMessageCreate;
 
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -27,41 +23,22 @@ public class Bot {
     private ScheduledExecutorService heartbeatScheduler;
 
     private final CommandManager commandManager;
-    private final HttpClient httpClient;
-    private final EventPublisher eventPublisher;
+    private final ApiClient apiClient;
+
+    private final EventManager eventManager;
 
 
     public Bot(String token) {
         this.token = token;
-        this.httpClient = HttpClient.newHttpClient();
+        this.apiClient = new ApiClient(token);
         this.commandManager = new CommandManager();
-        this.eventPublisher = new EventPublisher();
+        this.eventManager = new EventManager();
     }
 
     public CommandManager getCommandManager(){return commandManager;}
-    public EventPublisher getEventPublisher(){return eventPublisher;}
+    public EventManager getEventManager(){return eventManager;}
+    public ApiClient getApiClient() {return apiClient;}
 
-    public void sendMessage(String channelId, String textContent) {
-        CompletableFuture.runAsync(() -> {
-            try {
-                String url = "https://lolka.app/api/bot/v10/channels/" + channelId + "/messages";
-
-                JSONObject payload = new JSONObject();
-                payload.put("content", textContent);
-
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(url))
-                        .header("Authorization", "Bot " + token)
-                        .header("Content-Type", "application/json")
-                        .POST(HttpRequest.BodyPublishers.ofString(payload.toString()))
-                        .build();
-
-                httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            } catch (Exception e) {
-
-            }
-        });
-    }
 
 
     public void start(){
@@ -82,6 +59,7 @@ public class Bot {
                     String t = event.optString("t", "NONE");
 
                     System.out.println("[<-] Event (Opcode " + op + "): " + t);
+                    System.out.println(event);
 
                     if (op == 10 || (event.has("d") && event.getJSONObject("d").has("heartbeat_interval"))) {
                         long interval = event.getJSONObject("d").getLong("heartbeat_interval");
@@ -89,28 +67,18 @@ public class Bot {
                         sendIdentify();
                         return;
                     }
-
-
-
                     if ("READY".equals(t)) {
                         botId = event.getJSONObject("d").getJSONObject("user").getString("id");
+                        eventManager.dispatch(new OnReady());
                     } else if ("MESSAGE_CREATE".equals(t)) {
                         JSONObject msg = event.getJSONObject("d");
                         String authorId = msg.getJSONObject("author").getString("id");
-
                         if (!botId.equals(authorId)) {
                             commandManager.handle(new MessageContext(msg));
-                            if (eventPublisher.getMessageCreateListener() != null){
-                                eventPublisher.getMessageCreateListener().onEvent(new MessageCreate(Events.MESSAGE_CREATE));
-                            }
+                            eventManager.dispatch(new OnMessageCreate(new MessageContext(msg)));
                         }
-
-
                     }
-
-                    if (eventPublisher.getGlobalEventListener() != null){
-                        eventPublisher.getGlobalEventListener().onEvent(event);
-                    }
+                    //eventManager.dispatch(new GlobalEvent());
 
 
                 }
@@ -139,7 +107,7 @@ public class Bot {
 
         JSONObject d = new JSONObject();
         d.put("token", token);
-        d.put("intents", 33280);
+        d.put("intents", 33283);
         d.put("capabilities", 16383);
 
         JSONObject properties = new JSONObject();
@@ -181,4 +149,6 @@ public class Bot {
             heartbeatScheduler.shutdownNow();
         }
     }
+
+
 }

@@ -1,21 +1,25 @@
+import org.json.JSONObject;
 import ru.dev.Bot;
 import ru.dev.command.Command;
 import ru.dev.context.MessageContext;
+import ru.dev.event.bot.OnReady;
+import ru.dev.event.message.OnMessageCreate;
 
 class Test {
-    Bot bot = new Bot("");
+    Bot bot = new Bot("ODAzNzQ2NDk0NDY1MDI0.fjitdbtspIG2FZvgEt3awkEBjejqFyPfMVT5kNVT20Q");
     @org.junit.jupiter.api.Test
-    void command(){
-        bot.getCommandManager().register(new Command("/test"){
+    void repeat(){
+        bot.getCommandManager().register(new Command("/repeat"){
             @Override
-            public void onCommand(MessageContext messageContext){
-                bot.sendMessage(messageContext.getChannelId(),"test command");
+            public void onCommand(MessageContext ctx){
+                if (ctx.getReferencedMessage() != null){
+                    bot.getApiClient().sendMessage(ctx.getChannelId(),ctx.getReferencedMessage().getContent());
+                    return;
+                }
+                bot.getApiClient().sendMessage(ctx.getChannelId(),"Ответь на сообщение ,которое надо повторить!");
             }
         } );
-
         bot.start();
-
-
         try {
             Thread.currentThread().join();
         } catch (InterruptedException e) {
@@ -27,12 +31,16 @@ class Test {
     @org.junit.jupiter.api.Test
     void event(){
 
-        bot.getEventPublisher().globalEvent(event -> {
+        bot.getEventManager().on(OnReady.class, event -> {
             System.out.println("Event");
         });
 
-        bot.getEventPublisher().messageCreateEvent(event -> {
-            System.out.println(event.getType());
+        bot.getEventManager().on(OnMessageCreate.class, event -> {
+            System.out.println(event.getMessageContext().getContent());
+        });
+
+        bot.getEventManager().on(OnReady.class, event -> {
+            System.out.println("bot ready");
         });
 
         bot.start();

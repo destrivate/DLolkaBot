@@ -24,5 +24,6 @@ public class CommandManager {
         if (command != null) {
             command.onCommand(messageContext);
         }
+
     }
 }
