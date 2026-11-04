@@ -5,8 +5,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONObject;
 import ru.dev.command.CommandManager;
 import ru.dev.context.MessageContext;
-import ru.dev.event.EventPublisher;
-import ru.dev.event.Events;
+import ru.dev.event.EventManager;
 import ru.dev.event.bot.OnReady;
 import ru.dev.event.message.OnMessageCreate;
 
@@ -26,18 +25,18 @@ public class Bot {
     private final CommandManager commandManager;
     private final ApiClient apiClient;
 
-    private final EventPublisher eventPublisher;
+    private final EventManager eventManager;
 
 
     public Bot(String token) {
         this.token = token;
         this.apiClient = new ApiClient(token);
         this.commandManager = new CommandManager();
-        this.eventPublisher = new EventPublisher();
+        this.eventManager = new EventManager();
     }
 
     public CommandManager getCommandManager(){return commandManager;}
-    public EventPublisher getEventPublisher(){return eventPublisher;}
+    public EventManager getEventManager(){return eventManager;}
     public ApiClient getApiClient() {return apiClient;}
 
 
@@ -70,22 +69,16 @@ public class Bot {
                     }
                     if ("READY".equals(t)) {
                         botId = event.getJSONObject("d").getJSONObject("user").getString("id");
-                        if (eventPublisher.getReadyEventListener() != null){
-                            eventPublisher.getReadyEventListener().onEvent(new OnReady(Events.READY));
-                        }
+                        eventManager.dispatch(new OnReady());
                     } else if ("MESSAGE_CREATE".equals(t)) {
                         JSONObject msg = event.getJSONObject("d");
                         String authorId = msg.getJSONObject("author").getString("id");
                         if (!botId.equals(authorId)) {
                             commandManager.handle(new MessageContext(msg));
-                            if (eventPublisher.getOnMessageCreateListener() != null){
-                                eventPublisher.getOnMessageCreateListener().onEvent(new OnMessageCreate(Events.MESSAGE_CREATE,new MessageContext(msg)));
-                            }
+                            eventManager.dispatch(new OnMessageCreate(new MessageContext(msg)));
                         }
                     }
-                    if (eventPublisher.getOnGlobalEventListener() != null){
-                        eventPublisher.getOnGlobalEventListener().onEvent(event);
-                    }
+                    //eventManager.dispatch(new GlobalEvent());
 
 
                 }
